@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
+/// [ValueNotifier] for [YtController]
 /// define a class to hold the value of the player
 class YtPlayerValue {
   YtPlayerValue({
@@ -15,15 +16,43 @@ class YtPlayerValue {
 
   /// Reports the [WebViewController].
   final InAppWebViewController? webViewController;
+
+  YtPlayerValue copyWith({
+    bool? isReady,
+    InAppWebViewController? webViewController,
+  }) {
+    return YtPlayerValue(
+      isReady: isReady ?? this.isReady,
+      webViewController: webViewController ?? this.webViewController,
+    );
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType('
+        'isReady: $isReady, ';
+  }
 }
 
 class YtController extends ValueNotifier<YtPlayerValue> {
   /// A controller for [YtPlayer]
   YtController({
     required this.videoId,
+    // YtPlayerValue value =  YtPlayerValue(),
   }) : super(YtPlayerValue());
 
   final String videoId;
+
+  /// find yt_player in provided context
+
+  static YtController? of(BuildContext context) {
+    // final inherited = context.dependOnInheritedWidgetOfExactType<InheritedYtPlayer>();
+    // assert(inherited != null, 'No YtController found in context');
+    // return inherited?.controller;
+
+    return context.dependOnInheritedWidgetOfExactType<InheritedYtPlayer>()?.controller;
+  }
+
   // final InAppWebViewController webViewController = InAppWebViewController('' ,);
   /// call the native method by using the webview controller
   /// linking the javascript code to the dart code
@@ -34,6 +63,10 @@ class YtController extends ValueNotifier<YtPlayerValue> {
     } else {
       log('not ready');
     }
+  }
+
+  void upDateValue(YtPlayerValue newValue) {
+    value = newValue;
   }
 
   /// load the video
@@ -62,4 +95,19 @@ class YtController extends ValueNotifier<YtPlayerValue> {
 
   /// set the volume of the video
   void setVolume(int volume) => _nativeCall('setVolume($volume)');
+}
+
+class InheritedYtPlayer extends InheritedWidget {
+  const InheritedYtPlayer({
+    Key? key,
+    required this.controller,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  /// a controller for the player
+  final YtController controller;
+
+  @override
+  bool updateShouldNotify(InheritedYtPlayer oldWidget) =>
+      oldWidget.controller.hashCode != controller.hashCode;
 }
