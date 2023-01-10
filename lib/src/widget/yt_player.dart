@@ -1,5 +1,7 @@
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:yt_player/src/widget/progress_bar.dart';
 import 'package:yt_player/yt_player.dart';
 
 class YtPlayer extends StatefulWidget {
@@ -42,18 +44,12 @@ class _YtPlayerState extends State<YtPlayer> {
     return InheritedYtPlayer(
         controller: controller,
         child: Column(
-          children: [
-            const BottomPlayer(),
-            ProgressBar(
-              
-              progress: Duration(milliseconds: 1000),
-              buffered: Duration(milliseconds: 2000),
-              total: Duration(milliseconds: 5000),
-              onSeek: (duration) {
-                print('User selected a new time: $duration');
-              },
-            ),
+          children: const [
+             BottomPlayer(),
+            ProgressBarWidget(),
           ],
         ));
   }
 }
+
+

@@ -146,7 +146,16 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
                         throw Exception("Invalid player state obtained.");
                     }
                   },
+                )
+                  ..addJavaScriptHandler(
+              handlerName: 'VideoData',
+              callback: (args) {
+                controller!.upDateValue(
+                  controller!.value.copyWith(
+                      metaData: YoutubeMetaData.fromRawData(args.first)),
                 );
+              },
+            );
             },
           ),
         ),
@@ -202,7 +211,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
     var player;
-
+    var timerId;
     onYouTubeIframeAPIReady = function () {
         player = new YT.Player('player', {
             frameborder: "0",
@@ -223,15 +232,37 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
             events: {
               
                 onReady: function(event){window.flutter_inappwebview.callHandler('ready');}
-                // onStateChange: function(event) { sendPlayerStateChange(event.data); },
+                onStateChange: function(event) { sendPlayerStateChange(event.data); },
             
                }
           });
 
        }
-          function sendPlayerStateChange(playerState){
-            window.flutter_inappwebview.callHandler('stateChange', playerState);
-          }
+            function sendPlayerStateChange(playerState) {
+                clearTimeout(timerId);
+                window.flutter_inappwebview.callHandler('stateChange', playerState);
+                if (playerState == 1) {
+                    startSendCurrentTimeInterval();
+                    sendVideoData(player);
+                }
+            }
+
+             function sendVideoData(player) {
+                var videoData = {
+                    'duration': player.getDuration(),
+                    'title': player.getVideoData().title,
+                    'author': player.getVideoData().author,
+                    'videoId': player.getVideoData().video_id
+                };
+                window.flutter_inappwebview.callHandler('VideoData', videoData);
+            }
+
+            function startSendCurrentTimeInterval() {
+                timerId = setInterval(function () {
+                    window.flutter_inappwebview.callHandler('VideoTime', player.getCurrentTime(), player.getVideoLoadedFraction());
+                }, 100);
+            }
+
            function loadById(loadSettings) {
                 player.loadVideoById(loadSettings);
                 return '';
