@@ -18,4 +18,7 @@ enum PlayerState {
 
   /// 4 (video cued).
   videoCued,
+ 
+ /// not loaded the player
+  unknown
 }

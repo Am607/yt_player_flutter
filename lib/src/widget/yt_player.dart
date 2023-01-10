@@ -1,15 +1,16 @@
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
+import 'package:flutter/material.dart';
 import 'package:yt_player/yt_player.dart';
 
 class YtPlayer extends StatefulWidget {
   /// A [YtPlayer] controller for [YtPlayer]
   final YtController controller;
-///called when the player is ready to preform operation
-    final VoidCallback? onReady;
+
+  ///called when the player is ready to preform operation
+  final VoidCallback? onReady;
 
   /// create a [YtPlayer] widget
-  const YtPlayer({super.key, required this.controller , this.onReady});
+  const YtPlayer({super.key, required this.controller, this.onReady});
 
   @override
   State<YtPlayer> createState() => _YtPlayerState();
@@ -20,9 +21,7 @@ class _YtPlayerState extends State<YtPlayer> {
   @override
   void initState() {
     controller = widget.controller..addListener(listner);
-    if(controller.value.isReady){
-
-    }
+    if (controller.value.isReady) {}
     super.initState();
   }
 
@@ -37,10 +36,24 @@ class _YtPlayerState extends State<YtPlayer> {
     if (mounted) setState(() {});
   }
 
+//  final GlobalKey _key = GlobalKey();
   @override
   Widget build(BuildContext context) {
     return InheritedYtPlayer(
-      controller: controller,
-      child: YtPlayer(controller: controller));
+        controller: controller,
+        child: Column(
+          children: [
+            const BottomPlayer(),
+            ProgressBar(
+              
+              progress: Duration(milliseconds: 1000),
+              buffered: Duration(milliseconds: 2000),
+              total: Duration(milliseconds: 5000),
+              onSeek: (duration) {
+                print('User selected a new time: $duration');
+              },
+            ),
+          ],
+        ));
   }
 }

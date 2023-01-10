@@ -6,39 +6,36 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:yt_player/src/enum/player_state.dart';
 import 'package:yt_player/yt_player.dart';
 
-
-
-
-
 class BottomPlayer extends StatefulWidget {
-
-  const BottomPlayer({super.key,});
+  const BottomPlayer({
+    super.key,
+  });
 
   @override
   State<BottomPlayer> createState() => _BottomPlayerState();
 }
 
-class _BottomPlayerState extends State<BottomPlayer>  with WidgetsBindingObserver{
- late YtController ? controller;
+class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver {
+  late YtController? controller;
 
- @override
+  @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this); // Todo check what happend
   }
 
-   @override
+  @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);  // Todo check what happend
+    WidgetsBinding.instance.removeObserver(this); // Todo check what happend
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
-    // controller =  YtController(videoId: 'NaCM4jWaxk0'); 
-    ////! this is the problem 
-    // Todo widget look up to the ancestor 
+    // Todo widget look up to the ancestor
     controller = YtController.of(context);
     return Stack(
       children: [
@@ -77,23 +74,79 @@ class _BottomPlayerState extends State<BottomPlayer>  with WidgetsBindingObserve
                 webViewController: webController,
               ));
 
-              webController..addJavaScriptHandler(handlerName: 'ready', callback: (_){
-                log('ready_detected');
-                controller!.upDateValue(controller!.value.copyWith(
-                  isReady: true,
-
-                ));
-                // controller!.load(widget.id);
-              })
+              webController
                 ..addJavaScriptHandler(
-              handlerName: 'PlaybackQualityChange',
-              callback: (args) {
-                // controller!.updateValue(
-                //   controller!.value
-                //       .copyWith(playbackQuality: args.first as String),
-                // );
-              },
-            );
+                    handlerName: 'ready',
+                    callback: (_) {
+                      log('ready_detected');
+                      controller!.upDateValue(controller!.value.copyWith(
+                        isReady: true,
+                      ));
+                      // controller!.load(widget.id);
+                    })
+                ..addJavaScriptHandler(
+                  handlerName: 'PlaybackQualityChange',
+                  callback: (args) {
+                    // controller!.updateValue(
+                    //   controller!.value
+                    //       .copyWith(playbackQuality: args.first as String),
+                    // );
+                  },
+                )
+                ..addJavaScriptHandler(
+                  handlerName: 'stateChange',
+                  callback: (args) {
+                    switch (args.first as int) {
+                      case -1:
+                        controller!.upDateValue(controller!.value.copyWith(
+                          playerState: PlayerState.unstarted,
+                        ));
+                        break;
+
+                      case 0:
+                        controller!.upDateValue(
+                          controller!.value.copyWith(
+                            playerState: PlayerState.ended,
+                          ),
+                        );
+                        break;
+                      case 1:
+                        controller!.upDateValue(
+                          controller!.value.copyWith(
+                            playerState: PlayerState.playing,
+                            isPlaying: true,
+                            hasPlayed: true,
+                            errorCode: 0,
+                          ),
+                        );
+                        break;
+                      case 2:
+                        controller!.upDateValue(
+                          controller!.value.copyWith(
+                            playerState: PlayerState.paused,
+                            isPlaying: false,
+                          ),
+                        );
+                        break;
+                      case 3:
+                        controller!.upDateValue(
+                          controller!.value.copyWith(
+                            playerState: PlayerState.buffering,
+                          ),
+                        );
+                        break;
+                      case 5:
+                        controller!.upDateValue(
+                          controller!.value.copyWith(
+                            playerState: PlayerState.videoCued,
+                          ),
+                        );
+                        break;
+                      default:
+                        throw Exception("Invalid player state obtained.");
+                    }
+                  },
+                );
             },
           ),
         ),
@@ -131,6 +184,7 @@ class _BottomPlayerState extends State<BottomPlayer>  with WidgetsBindingObserve
                 // max-height: max-content;
                 height: 50vh;
                 width: 100%;
+                pointer-events: none;
               
         }
         </style>
@@ -158,27 +212,68 @@ class _BottomPlayerState extends State<BottomPlayer>  with WidgetsBindingObserve
             videoId: '${controller?.videoId}', // youtube video id
             playerVars: {
                 'playsinline': 1,
-                'controls': 1,
+                'controls': 0,
                 'enablejsapi': 1,
                 'fs': 0,
                 'rel': 0,
                 'showinfo': 0,
                 'autoplay': 0,
+                'modestbranding': 1,
             },
             events: {
-                // 'onStateChange': onPlayerStateChange,
-               'onReady': function(event){window.flutter_inappwebview.callHandler('ready');}
-                
+              
+                onReady: function(event){window.flutter_inappwebview.callHandler('ready');}
+                // onStateChange: function(event) { sendPlayerStateChange(event.data); },
+            
+               }
+          });
 
-            }
-        });
-
-    }
-
-  function loadById(loadSettings) {
+       }
+          function sendPlayerStateChange(playerState){
+            window.flutter_inappwebview.callHandler('stateChange', playerState);
+          }
+           function loadById(loadSettings) {
                 player.loadVideoById(loadSettings);
                 return '';
-  }
+            }
+             function play() {
+                player.playVideo();
+                return '';
+            }
+
+            function pause() {
+                player.pauseVideo();
+                return '';
+            }
+
+             function mute() {
+                player.mute();
+                return '';
+            }
+
+            function unMute() {
+                player.unMute();
+                return '';
+            }
+            function setVolume(volume) {
+                player.setVolume(volume);
+                return '';
+            }
+
+            function seekTo(position, seekAhead) {
+                player.seekTo(position, seekAhead);
+                return '';
+            }
+
+            function setSize(width, height) {
+                player.setSize(width, height);
+                return '';
+            }
+
+            function setPlaybackRate(rate) {
+                player.setPlaybackRate(rate);
+                return '';
+            }
 
     function hideVideoTitle() {
         console.log('hideVideoTitle');
@@ -197,7 +292,23 @@ class _BottomPlayerState extends State<BottomPlayer>  with WidgetsBindingObserve
         if (title) {
             title.style.display = 'none';
         }
-     
+
+          function setPlaybackQuality(playbackQuality) {
+            if (playbackQuality == "auto") {
+                localStorage.removeItem("yt-player-quality");         
+            } else {
+                var now = Date.now();
+                localStorage.setItem("yt-player-quality", JSON.stringify({
+                    data: playbackQuality,
+                    creation: now,
+                    expiration: now + 2419200000
+                }));
+            }
+            if(player) {
+                var currentTime = player.getCurrentTime();
+                player.loadVideoById(player.getVideoData().video_id, currentTime);
+            }
+        }
     }
 </script>
 </html>
