@@ -1,17 +1,22 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:yt_player/src/enum/player_state.dart';
+import 'package:yt_player/src/utils/mete_data.dart';
 
 /// [ValueNotifier] for [YtController]
 /// define a class to hold the value of the player
+/// current positon and currentPostion both are now an expirimental
+/// the player is not stabel and will have more issue in production
 class YtPlayerValue {
   YtPlayerValue({
     this.isReady = false,
     this.webViewController,
     this.bufferdPosition = Duration.zero,
     this.position = const Duration(),
+    this.currentPosition = 0.0,
     this.errorCode = 0,
     this.hasPlayed = false,
     this.isControllerVisible = false,
@@ -20,7 +25,13 @@ class YtPlayerValue {
     this.playerState = PlayerState.unstarted,
     this.volume = 100,
     this.quality,
+    this.isFullScreen = false,
+    this.muted = false,
+    this.youtubeMetaData = const YoutubeMetaData(),
   });
+
+  // meta Data for current playing video
+  final YoutubeMetaData youtubeMetaData;
 
   /// Return true if the player is ready
   final bool isReady;
@@ -34,8 +45,14 @@ class YtPlayerValue {
   /// Current position of the video
   final Duration position;
 
+  /// Current position of the videofor seek
+  double? currentPosition;
+
   /// Position up to which the video is bufferd
   final Duration bufferdPosition;
+
+  /// return true if player is muted
+  final bool muted;
 
   /// Return true while the video is playing
   final bool isPlaying;
@@ -43,37 +60,43 @@ class YtPlayerValue {
   /// Return true if the video is paused
   final bool isPaused;
 
-  // Volume of the player
+  /// Volume of the player
   final int volume;
 
-  // Current playerQuality
+  /// Current playerQuality
   final String? quality;
 
-  // Error code
+  /// Error code
   final int errorCode;
 
-  // Current state of the player
+  /// Current state of the player
   final PlayerState playerState;
+
+  /// is the player full screen
+  final bool isFullScreen;
 
   /// Return true if video is full Screen mode
 
   /// Reports the [WebViewController].
   final InAppWebViewController? webViewController;
 
-  YtPlayerValue copyWith({
-    bool? isReady,
-    InAppWebViewController? webViewController,
-    PlayerState? playerState,
-    bool? isControllerVisible,
-    bool? hasPlayed,
-    Duration? position,
-    Duration? bufferdPosition,
-    bool? isPlaying,
-    bool? isPaused,
-    int? volume,
-    String? quality,
-    int? errorCode,
-  }) {
+  YtPlayerValue copyWith(
+      {bool? isReady,
+      InAppWebViewController? webViewController,
+      PlayerState? playerState,
+      bool? isControllerVisible,
+      bool? hasPlayed,
+      Duration? position,
+      Duration? bufferdPosition,
+      bool? isPlaying,
+      bool? isPaused,
+      int? volume,
+      String? quality,
+      int? errorCode,
+      double? currentPosition,
+      bool? muted,
+      bool? isFullScreen,
+      YoutubeMetaData? youtubeMetaData}) {
     return YtPlayerValue(
       isReady: isReady ?? this.isReady,
       webViewController: webViewController ?? this.webViewController,
@@ -85,17 +108,23 @@ class YtPlayerValue {
       isPlaying: isPlaying ?? this.isPlaying,
       isPaused: isPaused ?? this.isPaused,
       volume: volume ?? this.volume,
+      muted: muted ?? this.muted,
       quality: quality ?? this.quality,
+      isFullScreen: isFullScreen ?? this.isFullScreen,
+      currentPosition: currentPosition ?? this.currentPosition,
       errorCode: errorCode ?? this.errorCode,
+      youtubeMetaData: youtubeMetaData ?? this.youtubeMetaData,
     );
   }
 
   @override
   String toString() {
     return '$runtimeType('
+        'youtubeMetaData: ${youtubeMetaData.toString()}, '
         'isReady: $isReady, '
         'isControllerVisible: $isControllerVisible, '
         'position: $position, '
+        'currentPosition: $currentPosition, '
         'bufferdPosition: $bufferdPosition, '
         'isPlaying: $isPlaying, '
         'isPaused: $isPaused, '
@@ -104,8 +133,8 @@ class YtPlayerValue {
         'playerState: $playerState, '
         'errorCode: $errorCode, '
         'hasPlayed: $hasPlayed, '
+        'muted: $muted, '
         'quality: $quality, ';
-         
   }
 }
 
@@ -136,7 +165,7 @@ class YtController extends ValueNotifier<YtPlayerValue> {
     if (value.isReady) {
       await value.webViewController?.evaluateJavascript(source: js);
     } else {
-      log('not ready');
+      // log('not ready');
     }
   }
 
@@ -165,8 +194,14 @@ class YtController extends ValueNotifier<YtPlayerValue> {
   /// unmute the video
   void unMute() => _nativeCall('unMute()');
 
+  /// set width
+  void setSize(Size size) {
+    var adjustedHeight = 9 / 16 * size.width;
+    _nativeCall('setSize(${size.width}, $adjustedHeight)');
+  }
+
   /// seek to a specific time
-  void seekTo(Duration d) => _nativeCall('seekTo(${d.inSeconds})');
+  void seekTo(Duration d) => _nativeCall('seekTo(${d.inSeconds}, true)');
 
   /// set the volume of the video
   void setVolume(int volume) => _nativeCall('setVolume($volume)');
@@ -178,6 +213,58 @@ class YtController extends ValueNotifier<YtPlayerValue> {
   void setQuality(String quality) {
     _nativeCall('setPlaybackQuality("$quality")');
     log('setQuality("$quality")');
+  }
+
+  Future<double> get currentTime async {
+    await _nativeCall('getCurrentTime');
+
+    return value.currentPosition ?? 0;
+  }
+
+  /// Creates a stream that repeatedly emits current time at [period] intervals.
+//   Stream<Duration> getCurrentPositionStream({
+//     Duration period = const Duration(microseconds: 200),
+//   }) async* {
+//     yield _getDurationFrom(seconds: await currentTime);
+//     // yield value.position;
+//
+//     yield* Stream.periodic(period).asyncMap(
+//       (_) async => _getDurationFrom(seconds: await currentTime),
+//       // value.position,
+//     );
+//   }
+
+  void toggleFullScreenMode() {
+    upDateValue(value.copyWith(isFullScreen: !value.isFullScreen));
+    if (value.isFullScreen) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+          overlays: SystemUiOverlay.values);
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    }
+  }
+
+  Stream<Duration> getCurrentPositionStream({
+    Duration period = const Duration(microseconds: 200),
+  }) async* {
+    yield _getDurationFrom(seconds: await currentTime);
+    // yield value.position;
+
+    yield* Stream.periodic(period).asyncMap(
+      (_) async => _getDurationFrom(seconds: await currentTime),
+      // value.position,
+    );
+  }
+
+  Duration _getDurationFrom({required double seconds}) {
+    final timeInMs = (seconds * 1000).truncate();
+
+    return Duration(milliseconds: timeInMs);
   }
 }
 

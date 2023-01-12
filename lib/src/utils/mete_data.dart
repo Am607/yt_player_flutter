@@ -1,12 +1,14 @@
+
+/// Metadata of the currently loaded Youtube video.
 class YoutubeMetaData {
   /// Youtube video ID of the currently loaded video.
   final String videoId;
 
   /// Video title of the currently loaded video.
-  final String title;
+  final String videoTitle;
 
   /// Channel name or uploader of the currently loaded video.
-  final String author;
+  final String authorName;
 
   /// Total duration of the currently loaded video.
   final Duration duration;
@@ -14,19 +16,19 @@ class YoutubeMetaData {
   /// Creates [YoutubeMetaData] for Youtube Video.
   const YoutubeMetaData({
     this.videoId = '',
-    this.title = '',
-    this.author = '',
+    this.videoTitle = '',
+    this.authorName = '',
     this.duration = const Duration(),
   });
 
-  /// Creates [YoutubeMetaData] from raw json video data.
+  /// [YoutubeMetaData] for the currently loaded video. 
   factory YoutubeMetaData.fromRawData(dynamic rawData) {
     final data = rawData as Map<String, dynamic>;
     final durationInMs = ((data['duration'] ?? 0).toDouble() * 1000).floor();
     return YoutubeMetaData(
       videoId: data['videoId'],
-      title: data['title'],
-      author: data['author'],
+      videoTitle: data['title'],
+      authorName: data['author'],
       duration: Duration(milliseconds: durationInMs),
     );
   }
@@ -35,8 +37,8 @@ class YoutubeMetaData {
   String toString() {
     return '$runtimeType('
         'videoId: $videoId, '
-        'title: $title, '
-        'author: $author, '
+        'title: $videoTitle, '
+        'author: $authorName, '
         'duration: ${duration.inSeconds} sec.)';
   }
 }

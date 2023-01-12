@@ -7,6 +7,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:yt_player/src/enum/player_state.dart';
+import 'package:yt_player/src/utils/mete_data.dart';
 import 'package:yt_player/yt_player.dart';
 
 class BottomPlayer extends StatefulWidget {
@@ -37,138 +38,164 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
   Widget build(BuildContext context) {
     // Todo widget look up to the ancestor
     controller = YtController.of(context);
-    return Stack(
-      children: [
-        SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height / 4,
-          child: InAppWebView(
-            initialOptions: InAppWebViewGroupOptions(
-                crossPlatform: InAppWebViewOptions(
-                  supportZoom: false,
-                  javaScriptEnabled: true,
-                  mediaPlaybackRequiresUserGesture: false,
-                  transparentBackground: true,
-                  disableContextMenu: true,
-                  disableHorizontalScroll: false,
-                  disableVerticalScroll: false,
-                  useShouldOverrideUrlLoading: true,
-                ),
-                android: AndroidInAppWebViewOptions(
-                  allowContentAccess: true,
-                  useHybridComposition: true,
-                ),
-                ios: IOSInAppWebViewOptions(
-                  allowsInlineMediaPlayback: true,
-                  allowsAirPlayForMediaPlayback: true,
-                  allowsPictureInPictureMediaPlayback: true,
-                )),
-            initialData: InAppWebViewInitialData(
-              data: player,
-              encoding: 'utf-8',
-              mimeType: 'text/html',
-              baseUrl: Uri.parse('https://www.youtube.com/'),
-            ),
-            onWebViewCreated: (webController) {
-              controller!.upDateValue(controller!.value.copyWith(
-                webViewController: webController,
-              ));
+    final size = MediaQuery.of(context).size;
+    return IgnorePointer(
+      child: InAppWebView(
+        initialOptions: InAppWebViewGroupOptions(
+          crossPlatform: InAppWebViewOptions(
+            supportZoom: false,
+            javaScriptEnabled: true,
+            mediaPlaybackRequiresUserGesture: false,
+            transparentBackground: true,
+            disableContextMenu: true,
+            disableHorizontalScroll: true,
+            disableVerticalScroll: true,
+            useShouldOverrideUrlLoading: true,
+          ),
+          android: AndroidInAppWebViewOptions(
+            useWideViewPort: false,
+            // allowContentAccess: true,
 
-              webController
-                ..addJavaScriptHandler(
-                    handlerName: 'ready',
-                    callback: (_) {
-                      log('ready_detected');
-                      controller!.upDateValue(controller!.value.copyWith(
-                        isReady: true,
-                      ));
-                      // controller!.load(widget.id);
-                    })
-                ..addJavaScriptHandler(
-                  handlerName: 'PlaybackQualityChange',
-                  callback: (args) {
-                    // controller!.updateValue(
-                    //   controller!.value
-                    //       .copyWith(playbackQuality: args.first as String),
-                    // );
-                  },
-                )
-                ..addJavaScriptHandler(
-                  handlerName: 'stateChange',
-                  callback: (args) {
-                    switch (args.first as int) {
-                      case -1:
-                        controller!.upDateValue(controller!.value.copyWith(
-                          playerState: PlayerState.unstarted,
-                        ));
-                        break;
-
-                      case 0:
-                        controller!.upDateValue(
-                          controller!.value.copyWith(
-                            playerState: PlayerState.ended,
-                          ),
-                        );
-                        break;
-                      case 1:
-                        controller!.upDateValue(
-                          controller!.value.copyWith(
-                            playerState: PlayerState.playing,
-                            isPlaying: true,
-                            hasPlayed: true,
-                            errorCode: 0,
-                          ),
-                        );
-                        break;
-                      case 2:
-                        controller!.upDateValue(
-                          controller!.value.copyWith(
-                            playerState: PlayerState.paused,
-                            isPlaying: false,
-                          ),
-                        );
-                        break;
-                      case 3:
-                        controller!.upDateValue(
-                          controller!.value.copyWith(
-                            playerState: PlayerState.buffering,
-                          ),
-                        );
-                        break;
-                      case 5:
-                        controller!.upDateValue(
-                          controller!.value.copyWith(
-                            playerState: PlayerState.videoCued,
-                          ),
-                        );
-                        break;
-                      default:
-                        throw Exception("Invalid player state obtained.");
-                    }
-                  },
-                )
-                  ..addJavaScriptHandler(
-              handlerName: 'VideoData',
-              callback: (args) {
-                controller!.upDateValue(
-                  controller!.value.copyWith(
-                      metaData: YoutubeMetaData.fromRawData(args.first)),
-                );
-              },
-            );
-            },
+            useHybridComposition: true,
+          ),
+          ios: IOSInAppWebViewOptions(
+            allowsInlineMediaPlayback: true,
+            allowsAirPlayForMediaPlayback: true,
+            allowsPictureInPictureMediaPlayback: true,
           ),
         ),
-        InkWell(
-          onTap: () {
-            log('onTap_detected');
-          },
-          child: Container(
-            height: 77,
-            color: Colors.transparent,
-          ),
-        )
-      ],
+        initialData: InAppWebViewInitialData(
+          data: player,
+          encoding: 'utf-8',
+          mimeType: 'text/html',
+          baseUrl: Uri.parse('https://www.youtube.com/'),
+        ),
+        onWebViewCreated: (webController) {
+          controller!.upDateValue(controller!.value.copyWith(
+            webViewController: webController,
+          ));
+
+          webController
+            ..addJavaScriptHandler(
+                handlerName: 'ready',
+                callback: (_) {
+                  // log('ready_detected');
+                  controller!.upDateValue(controller!.value.copyWith(
+                    isReady: true,
+                  ));
+                  controller!.play();
+                  //  controller!.setSize(Size(size.width, 300));
+                })
+            ..addJavaScriptHandler(
+              handlerName: 'PlaybackQualityChange',
+              callback: (args) {
+                // controller!.updateValue(
+                //   controller!.value
+                //       .copyWith(playbackQuality: args.first as String),
+                // );
+              },
+            )
+            ..addJavaScriptHandler(
+              handlerName: 'stateChange',
+              callback: (args) {
+                switch (args.first as int) {
+                  case -1:
+                    controller!.upDateValue(controller!.value.copyWith(
+                      playerState: PlayerState.unstarted,
+                    ));
+                    break;
+
+                  case 0:
+                    controller!.upDateValue(
+                      controller!.value.copyWith(
+                        playerState: PlayerState.ended,
+                      ),
+                    );
+                    break;
+                  case 1:
+                    controller!.upDateValue(
+                      controller!.value.copyWith(
+                        playerState: PlayerState.playing,
+                        isPlaying: true,
+                        hasPlayed: true,
+                        errorCode: 0,
+                      ),
+                    );
+                    break;
+                  case 2:
+                    controller!.upDateValue(
+                      controller!.value.copyWith(
+                        playerState: PlayerState.paused,
+                        isPlaying: false,
+                      ),
+                    );
+                    break;
+                  case 3:
+                    controller!.upDateValue(
+                      controller!.value.copyWith(
+                        playerState: PlayerState.buffering,
+                      ),
+                    );
+                    break;
+                  case 5:
+                    controller!.upDateValue(
+                      controller!.value.copyWith(
+                        playerState: PlayerState.videoCued,
+                      ),
+                    );
+                    break;
+                  default:
+                    throw Exception("Invalid player state obtained.");
+                }
+              },
+            )
+            ..addJavaScriptHandler(
+              handlerName: 'addMetaData',
+              callback: (args) {
+                controller!.upDateValue(
+                  controller!.value
+                      .copyWith(youtubeMetaData: YoutubeMetaData.fromRawData(args.first)),
+                );
+              },
+            )
+            ..addJavaScriptHandler(
+              handlerName: 'VideoTime',
+              callback: (args) {
+                final position = args.first * 1000;
+                final num buffered = args.last;
+                controller!.upDateValue(
+                  controller!.value.copyWith(
+                      position: Duration(milliseconds: position.floor()),
+                      bufferdPosition: Duration(milliseconds: buffered.floor())),
+                );
+              },
+            )
+            ..addJavaScriptHandler(
+              handlerName: 'addMute',
+              callback: (args) {
+                controller!.upDateValue(controller!.value.copyWith(
+                  muted: true
+                ));
+              },
+            )
+             ..addJavaScriptHandler(
+              handlerName: 'addUnMute',
+              callback: (args) {
+                controller!.upDateValue(controller!.value.copyWith(
+                  muted:  false,
+                ));
+              },
+            )
+            ..addJavaScriptHandler(
+              handlerName: 'addCurrentTime',
+              callback: (args) {
+                controller!.upDateValue(controller!.value.copyWith(
+                  currentPosition: args.first as double,
+                ));
+              },
+            );
+        },
+      ),
     );
   }
 
@@ -182,21 +209,20 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
     <link rel="stylesheet" href="style.css">
     <title>Document</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-        }
+        html,
         body{
-            background-color: #000000;
+                margin: 0;
+                padding: 0;
+                background-color: #000000;
                 overflow: hidden;
                 position: fixed;
-                // max-height: max-content;
-                height: 50vh;
+                height: 100%;
                 width: 100%;
                 pointer-events: none;
               
         }
         </style>
+         <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
 </head>
 
 <body>
@@ -231,7 +257,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
             },
             events: {
               
-                onReady: function(event){window.flutter_inappwebview.callHandler('ready');}
+                onReady: function(event){window.flutter_inappwebview.callHandler('ready');},
                 onStateChange: function(event) { sendPlayerStateChange(event.data); },
             
                }
@@ -254,7 +280,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
                     'author': player.getVideoData().author,
                     'videoId': player.getVideoData().video_id
                 };
-                window.flutter_inappwebview.callHandler('VideoData', videoData);
+                window.flutter_inappwebview.callHandler('addMetaData', videoData);
             }
 
             function startSendCurrentTimeInterval() {
@@ -272,6 +298,12 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
                 return '';
             }
 
+              function getCurrentTime() {
+              var time = player.getCurrentTime();
+              window.flutter_inappwebview.callHandler('addCurrentTime', time);
+              return '';
+            }
+
             function pause() {
                 player.pauseVideo();
                 return '';
@@ -279,16 +311,19 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
 
              function mute() {
                 player.mute();
+                 window.flutter_inappwebview.callHandler('addMute', true);
                 return '';
             }
 
             function unMute() {
                 player.unMute();
+                 window.flutter_inappwebview.callHandler('addUnMute' , false);
                 return '';
             }
             function setVolume(volume) {
                 player.setVolume(volume);
                 return '';
+                
             }
 
             function seekTo(position, seekAhead) {

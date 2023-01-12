@@ -16,34 +16,72 @@ class ProgressBarWidget extends StatefulWidget {
 class _ProgressBarWidgetState extends State<ProgressBarWidget> {
   late YtController _controller;
 
-  double _playedValue = 0.0;
-  double _bufferedValue = 0.0;
+  // double _playedValue = 0.0;
+  // double _bufferedValue = 0.0;
 
   @override
   void didChangeDependencies() {
     final controller = YtController.of(context);
-    if(controller == null){
-      // checking only the internal controller 
+    if (controller == null) {
+      // checking only the internal controller
       // but also can pass explicitly
-      assert(
-        true,
-        'No YtController found in context');
-    }else{
+      assert(true, 'No YtController found in context');
+    } else {
       _controller = controller;
     }
     super.didChangeDependencies();
   }
+
+  bool takeDragPosition = false;
   @override
   Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: StreamBuilder<Object>(
+          stream: _controller.getCurrentPositionStream(),
+          builder: (context, snapshot) {
+            // log('buffered position ${_controller.value.bufferdPosition}');
 
-    return ProgressBar(
-      
-      progress: _controller.value.position,
-      // buffered: Duration(milliseconds: 2000),
-      total: Duration(milliseconds: 300),
-      onSeek: (duration) {
-        log('User selected a new time: $duration');
-      },
+            // var positon = _controller.value.position;
+            // late Duration dragPosition;
+            // takePostion() {
+            //   if (takeDragPosition) {
+            //     return dragPosition;
+            //   } else {
+            //     return positon;
+            //   }
+            // }
+
+            // log('takeDragPosition $takeDragPosition');
+
+            return ProgressBar(
+              timeLabelTextStyle: const TextStyle(color: Colors.white),
+              timeLabelLocation: TimeLabelLocation.sides,
+              progressBarColor: Colors.red,
+              thumbRadius: 0,
+              thumbColor: Colors.red,
+              thumbCanPaintOutsideBar: false,
+              // progress: takePostion(),
+              progress: _controller.value.position,
+              buffered: _controller.value.bufferdPosition,
+              // buffered: const Duration(seconds: 10),
+              total: _controller.value.youtubeMetaData.duration,
+              onSeek: (duration) {
+                _controller.seekTo(duration);
+         
+              },
+              // onDragStart: (details) {
+              //   setState(() {});
+              // },
+              // onDragEnd: (() {
+              //   setState(() {
+              //     Future.delayed(const Duration(seconds: 2)).then((value) {
+              //       takeDragPosition = false;
+              //     });
+              //   });
+              // }),
+            );
+          }),
     );
   }
 }
