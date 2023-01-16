@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:yt_player/src/enum/player_state.dart';
 import 'package:yt_player/src/utils/mete_data.dart';
+import 'package:yt_player/src/widget/yt_player.dart';
 
 /// [ValueNotifier] for [YtController]
 /// define a class to hold the value of the player
@@ -209,11 +210,12 @@ class YtController extends ValueNotifier<YtPlayerValue> {
   /// setPlayBackRate
   void setPlayBackRate(double rate) => _nativeCall('setPlaybackRate($rate)');
 
-  /// set quality of the video
-  void setQuality(String quality) {
+  void changeVideoQuality(String quality) {
     _nativeCall('setPlaybackQuality("$quality")');
-    log('setQuality("$quality")');
+    log('changeVideoQuality("$quality")');
   }
+
+ 
 
   Future<double> get currentTime async {
     await _nativeCall('getCurrentTime');
@@ -234,20 +236,51 @@ class YtController extends ValueNotifier<YtPlayerValue> {
 //     );
 //   }
 
-  void toggleFullScreenMode() {
+  void toggleFullScreenMode(BuildContext context) {
     upDateValue(value.copyWith(isFullScreen: !value.isFullScreen));
     if (value.isFullScreen) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
+        SystemUiOverlay.top,
+        SystemUiOverlay.bottom,
+      ]);
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
       ]);
+      // Navigator.of(context).push(_createRoute());
     } else {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
           overlays: SystemUiOverlay.values);
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+      // Navigator.of(context).pop();
+      // Navigator.of(context).didUpdateWidget(Navigator.of(context).widget);
+
     }
   }
+
+  // Route _createRoute() {
+  //   return PageRouteBuilder(
+  //     pageBuilder: (context, animation, secondaryAnimation) => Scaffold(
+  //       body: Container(
+  //         color: Colors.black,
+  //         child: Center(
+  //           child: AspectRatio(
+  //             aspectRatio: 16 / 9,
+  //             child: YtPlayer(
+  //               controller: this,
+  //               // onReady: () {
+  //               //   log('Player is ready.');
+  //               // },
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+  //       return child;
+  //     },
+  //   );
+  // }
 
   Stream<Duration> getCurrentPositionStream({
     Duration period = const Duration(microseconds: 200),

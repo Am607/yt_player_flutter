@@ -21,7 +21,6 @@ class BottomPlayer extends StatefulWidget {
 
 class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver {
   late YtController? controller;
-
   @override
   void initState() {
     super.initState();
@@ -34,9 +33,12 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
     super.dispose();
   }
 
+  WebStorageManager webStorageManager = WebStorageManager.instance();
+
   @override
   Widget build(BuildContext context) {
     // Todo widget look up to the ancestor
+
     controller = YtController.of(context);
     final size = MediaQuery.of(context).size;
     return IgnorePointer(
@@ -54,11 +56,13 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
           ),
           android: AndroidInAppWebViewOptions(
             useWideViewPort: false,
-            // allowContentAccess: true,
 
+            // allowContentAccess: true,
+            domStorageEnabled: true,
             useHybridComposition: true,
           ),
           ios: IOSInAppWebViewOptions(
+            sharedCookiesEnabled: true,
             allowsInlineMediaPlayback: true,
             allowsAirPlayForMediaPlayback: true,
             allowsPictureInPictureMediaPlayback: true,
@@ -173,16 +177,14 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
             ..addJavaScriptHandler(
               handlerName: 'addMute',
               callback: (args) {
-                controller!.upDateValue(controller!.value.copyWith(
-                  muted: true
-                ));
+                controller!.upDateValue(controller!.value.copyWith(muted: true));
               },
             )
-             ..addJavaScriptHandler(
+            ..addJavaScriptHandler(
               handlerName: 'addUnMute',
               callback: (args) {
                 controller!.upDateValue(controller!.value.copyWith(
-                  muted:  false,
+                  muted: false,
                 ));
               },
             )
@@ -241,9 +243,8 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
     onYouTubeIframeAPIReady = function () {
         player = new YT.Player('player', {
             frameborder: "0",
-            height: '244',
-            width: '434',
-            // videoId: '6BX9nCiFd2k?modestbranding=1&autohide=1&quality=low', // youtube video id
+            height: '100%',
+            width: '100%',
             videoId: '${controller?.videoId}', // youtube video id
             playerVars: {
                 'playsinline': 1,
@@ -253,10 +254,10 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
                 'rel': 0,
                 'showinfo': 0,
                 'autoplay': 0,
+                'iv_load_policy': 3,
                 'modestbranding': 1,
             },
             events: {
-              
                 onReady: function(event){window.flutter_inappwebview.callHandler('ready');},
                 onStateChange: function(event) { sendPlayerStateChange(event.data); },
             
@@ -334,6 +335,26 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
             function setSize(width, height) {
                 player.setSize(width, height);
                 return '';
+            }
+            function setPlaybackQuality(playbackQuality) {
+             if (playbackQuality == "auto") {
+            //this will make quality auto
+             localStorage.removeItem("yt-player-quality");
+                } else  {
+                var now = Date.now();
+                //this will set quality of your choice and it will be saved and be default for every video until expires:)
+               localStorage.setItem("yt-player-quality", JSON.stringify({
+                data: playbackQuality,
+                creation: now,
+                expiration: now + 2419200000
+            }));
+           }
+           //after you set value you have to reload the player to see the effect.
+           //so this method reloads the video where you left it so it is kinda seemless
+            if (player) {
+            var currentTime = player.getCurrentTime();
+            player.loadVideoById(player.getVideoData().video_id, currentTime);
+              }
             }
 
             function setPlaybackRate(rate) {

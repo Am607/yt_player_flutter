@@ -3,26 +3,80 @@ import 'dart:developer';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:yt_player/src/widget/bottom_controles.dart';
+import 'package:yt_player/src/widget/bottom_controls.dart';
 import 'package:yt_player/src/widget/play_pause_button.dart';
 import 'package:yt_player/src/widget/progress_bar.dart';
 import 'package:yt_player/yt_player.dart';
 
-class YtPlayer extends StatefulWidget {
-  /// A [YtPlayer] controller for [YtPlayer]
+// wraper p
+// class YtPlayer extends StatefulWidget {
+//   /// A [YtPlayerBase] controller for [YtPlayerBase]
+//   final YtController controller;
+//
+//   ///called when the player is ready to preform operation
+//   final VoidCallback? onReady;
+//   const YtPlayer({super.key, required this.controller, this.onReady});
+//
+//   @override
+//   State<YtPlayer> createState() => _YtPlayerState();
+// }
+//
+// class _YtPlayerState extends State<YtPlayer> with WidgetsBindingObserver {
+//   @override
+//   void initState() {
+//     super.initState();
+//     WidgetsBinding.instance.addObserver(this);
+//   }
+//
+//   @override
+//   void dispose() {
+//     WidgetsBinding.instance.removeObserver(this);
+//     super.dispose();
+//   }
+//
+//   @override
+//   void didChangeMetrics() {
+//     log('didChangeMetrics');
+//     super.didChangeMetrics();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     Widget portrait() =>
+//         YtPlayerBase(controller: widget.controller, onReady: widget.onReady);
+//     Widget landscape() => WillPopScope(
+//         onWillPop: () async {
+//           final controller = widget.controller;
+//           if (controller.value.isFullScreen) {
+//             widget.controller.toggleFullScreenMode(context);
+//             return false;
+//           }
+//           return true;
+//         },
+//         child: YtPlayerBase(controller: widget.controller, onReady: widget.onReady));
+//     return OrientationBuilder(
+//       builder: ((context, orientation) {
+//         return orientation == Orientation.portrait ? portrait() : landscape();
+//       }),
+//     );
+//   }
+// }
+
+class YtPlayerBase extends StatefulWidget {
+  /// A [YtPlayerBase] controller for [YtPlayerBase]
   final YtController controller;
 
   ///called when the player is ready to preform operation
   final VoidCallback? onReady;
 
-  /// create a [YtPlayer] widget
-  const YtPlayer({super.key, required this.controller, this.onReady});
+  /// create a [YtPlayerBase] widget
+  const YtPlayerBase({super.key, required this.controller, this.onReady});
 
   @override
-  State<YtPlayer> createState() => _YtPlayerState();
+  State<YtPlayerBase> createState() => _YtPlayerBaseState();
 }
 
-class _YtPlayerState extends State<YtPlayer> {
+class _YtPlayerBaseState extends State<YtPlayerBase> {
   late YtController controller;
   @override
   void initState() {
@@ -46,58 +100,63 @@ class _YtPlayerState extends State<YtPlayer> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    return InheritedYtPlayer(
-      controller: controller,
-      child: Container(
-        color: Colors.black87,
-        width: MediaQuery.of(context).size.width,
-        child: AspectRatio(
-          aspectRatio: 16 / 9,
-          child: Stack(
-            fit: StackFit.loose,
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            // fit: StackFit.expand,
-            // clipBehavior: Clip.none,
-            children: [
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: SizedBox(
-                  width: width,
-                  child: Transform.scale(
-                    scale: controller.value.isFullScreen
-                        ? (1 / (16 / 9) * MediaQuery.of(context).size.width) /
-                            MediaQuery.of(context).size.height
-                        : 1,
-                    child: const BottomPlayer(),
+    return Material(
+      elevation: 0,
+      color: Colors.black,
+      child: InheritedYtPlayer(
+        controller: controller,
+        child: Container(
+          color: Colors.black87,
+          width: MediaQuery.of(context).size.width,
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Stack(
+              fit: StackFit.loose,
+              clipBehavior: Clip.antiAliasWithSaveLayer,
+              // fit: StackFit.expand,
+              // clipBehavior: Clip.none,
+              children: [
+                AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: SizedBox(
+                    // color: Colors.red,
+                    child: Transform.scale(
+                      scale: controller.value.isFullScreen
+                          ? (1 / 1.77 * MediaQuery.of(context).size.width) /
+                              MediaQuery.of(context).size.height
+                          : 1,
+                      child: const BottomPlayer(),
+                    ),
                   ),
                 ),
-              ),
-              const Align(
-                alignment: Alignment.center,
-                child: PlayPauseButton(),
-              ),
-              Positioned(
-                bottom: 26,
-                right: 0,
-                child: IconButton(
+                const Align(
+                  alignment: Alignment.center,
+                  child: PlayPauseButton(),
+                ),
+                Positioned(
+                  bottom: 34,
+                  right: 0,
+                  child: IconButton(
                     onPressed: () {
-                      controller.toggleFullScreenMode();
+                      controller.toggleFullScreenMode(context);
                     },
                     icon: Icon(
                       controller.value.isFullScreen
                           ? Icons.fullscreen_exit
                           : Icons.fullscreen,
                       color: Colors.white,
-                    )),
-              ),
-              const Positioned(
-                bottom: 15,
-                left: 0,
-                right: 0,
-                child: ProgressBarWidget(),
-              ),
-              const Positioned(bottom: 0, left: 0, child: BottomControls()),
-            ],
+                    ),
+                  ),
+                ),
+                const Positioned(
+                  bottom: 32,
+                  left: 0,
+                  right: 0,
+                  child: ProgressBarWidget(),
+                ),
+                const Positioned(bottom: 3, left: 0, child: BottomControls()),
+              ],
+            ),
           ),
         ),
       ),

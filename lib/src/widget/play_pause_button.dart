@@ -37,37 +37,40 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
           mainAxisSize: MainAxisSize.max,
           children: [
             IconButton(
-                onPressed: () {
-                  _controller
-                      .seekTo(_controller.value.position - const Duration(seconds: 10));
-                  // controller.seekTo(const Duration(seconds: 10));
-                },
-                icon: const Icon(
-                  Icons.replay_10,
-                  color: Colors.white,
-                )),
+              onPressed: () {
+                _controller
+                    .seekTo(_controller.value.position - const Duration(seconds: 10));
+                // controller.seekTo(const Duration(seconds: 10));
+              },
+              icon: const Icon(
+                Icons.replay_10,
+                color: Colors.white,
+              ),
+            ),
             IconButton(
-                onPressed: () {
-                  setState(() {
-                    _controller.value.isPlaying ? _controller.pause() : _controller.play();
-                  });
-                },
-                icon: Icon(
-                  !_controller.value.isPlaying ? Icons.pause: Icons.play_arrow , 
-                  color: Colors.white,
-                )),
+              onPressed: () {
+                setState(() {
+                  _controller.value.isPlaying ? _controller.pause() : _controller.play();
+                });
+              },
+              icon: Icon(
+                !_controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                color: Colors.white,
+              ),
+            ),
             IconButton(
-                onPressed: () {
-                  // _controller.setQuality('tiny');
-                  // _controller
-                      // .seekTo(_controller.value.position + const Duration(seconds: 10));
-                       _controller.toggleFullScreenMode();
-                  // controller.seekTo(const Duration(seconds: 10));
-                },
-                icon: const Icon(
-                  Icons.forward_10,
-                  color: Colors.white,
-                )),
+              onPressed: () {
+                // _controller.setQuality('tiny');
+                // _controller
+                // .seekTo(_controller.value.position + const Duration(seconds: 10));
+                _controller.toggleFullScreenMode(context);
+                // controller.seekTo(const Duration(seconds: 10));
+              },
+              icon: const Icon(
+                Icons.forward_10,
+                color: Colors.white,
+              ),
+            ),
           ],
         ),
       ),
