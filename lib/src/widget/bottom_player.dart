@@ -34,6 +34,10 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
   }
 
   WebStorageManager webStorageManager = WebStorageManager.instance();
+  CookieManager cookieManager = CookieManager.instance();
+  // set the expiration date for the cookie in milliseconds
+final expiresDate = DateTime.now().add(Duration(days: 3)).millisecondsSinceEpoch;
+
 
   @override
   Widget build(BuildContext context) {
@@ -338,29 +342,26 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
             }
             function setPlaybackQuality(playbackQuality) {
              if (playbackQuality == "auto") {
-            //this will make quality auto
+             //this will make quality auto
              localStorage.removeItem("yt-player-quality");
                 } else  {
                 var now = Date.now();
-                //this will set quality of your choice and it will be saved and be default for every video until expires:)
+             
                localStorage.setItem("yt-player-quality", JSON.stringify({
                 data: playbackQuality,
                 creation: now,
                 expiration: now + 2419200000
-            }));
+              })
+              );
            }
-           //after you set value you have to reload the player to see the effect.
-           //so this method reloads the video where you left it so it is kinda seemless
+          
             if (player) {
             var currentTime = player.getCurrentTime();
             player.loadVideoById(player.getVideoData().video_id, currentTime);
               }
             }
 
-            function setPlaybackRate(rate) {
-                player.setPlaybackRate(rate);
-                return '';
-            }
+          
 
     function hideVideoTitle() {
         console.log('hideVideoTitle');
@@ -380,22 +381,6 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
             title.style.display = 'none';
         }
 
-          function setPlaybackQuality(playbackQuality) {
-            if (playbackQuality == "auto") {
-                localStorage.removeItem("yt-player-quality");         
-            } else {
-                var now = Date.now();
-                localStorage.setItem("yt-player-quality", JSON.stringify({
-                    data: playbackQuality,
-                    creation: now,
-                    expiration: now + 2419200000
-                }));
-            }
-            if(player) {
-                var currentTime = player.getCurrentTime();
-                player.loadVideoById(player.getVideoData().video_id, currentTime);
-            }
-        }
     }
 </script>
 </html>
