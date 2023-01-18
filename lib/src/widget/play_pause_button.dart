@@ -60,11 +60,9 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
             ),
             IconButton(
               onPressed: () {
-                // _controller.setQuality('tiny');
-                // _controller
-                // .seekTo(_controller.value.position + const Duration(seconds: 10));
-                _controller.toggleFullScreenMode(context);
-                // controller.seekTo(const Duration(seconds: 10));
+                _controller
+                    .seekTo(_controller.value.position + const Duration(seconds: 10));
+                // _controller.toggleFullScreenMode(context);
               },
               icon: const Icon(
                 Icons.forward_10,

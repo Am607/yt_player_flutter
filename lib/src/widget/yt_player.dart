@@ -97,8 +97,10 @@ class _YtPlayerBaseState extends State<YtPlayerBase> {
   }
 
 //  final GlobalKey _key = GlobalKey();
+  Orientation? orientation;
   @override
   Widget build(BuildContext context) {
+    orientation = MediaQuery.of(context).orientation;
     final width = MediaQuery.of(context).size.width;
     return Material(
       elevation: 0,
@@ -107,7 +109,7 @@ class _YtPlayerBaseState extends State<YtPlayerBase> {
         controller: controller,
         child: Container(
           color: Colors.black87,
-          width: MediaQuery.of(context).size.width,
+          // width: MediaQuery.of(context).size.width,
           child: AspectRatio(
             aspectRatio: 16 / 9,
             child: Stack(
@@ -116,16 +118,30 @@ class _YtPlayerBaseState extends State<YtPlayerBase> {
               // fit: StackFit.expand,
               // clipBehavior: Clip.none,
               children: [
-                AspectRatio(
-                  aspectRatio: 16 / 9,
+                GestureDetector(
+                  onTapUp: (TapUpDetails details) {
+                    log('tap up');
+                  },
+                  onPanUpdate: (details) {
+                    log('pan update');
+                    log(details.localPosition.toString());
+                  },
+                  onDoubleTap: (() {
+                    log('double tap');
+                    controller.togglePlayPause();
+                  }),
                   child: SizedBox(
-                    // color: Colors.red,
-                    child: Transform.scale(
-                      scale: controller.value.isFullScreen
-                          ? (1 / 1.77 * MediaQuery.of(context).size.width) /
-                              MediaQuery.of(context).size.height
-                          : 1,
-                      child: const BottomPlayer(),
+                    child: AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: SizedBox(
+                        width: orientation == Orientation.portrait
+                            ? MediaQuery.of(context).size.width
+                            : null,
+                        height: orientation == Orientation.landscape
+                            ? MediaQuery.of(context).size.height
+                            : null,
+                        child: const BottomPlayer(),
+                      ),
                     ),
                   ),
                 ),

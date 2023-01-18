@@ -36,8 +36,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
   WebStorageManager webStorageManager = WebStorageManager.instance();
   CookieManager cookieManager = CookieManager.instance();
   // set the expiration date for the cookie in milliseconds
-final expiresDate = DateTime.now().add(Duration(days: 3)).millisecondsSinceEpoch;
-
+  final expiresDate = DateTime.now().add(Duration(days: 3)).millisecondsSinceEpoch;
 
   @override
   Widget build(BuildContext context) {
@@ -343,11 +342,11 @@ final expiresDate = DateTime.now().add(Duration(days: 3)).millisecondsSinceEpoch
             function setPlaybackQuality(playbackQuality) {
              if (playbackQuality == "auto") {
              //this will make quality auto
-             localStorage.removeItem("yt-player-quality");
+             window.localStorage.removeItem("yt-player-quality");
                 } else  {
                 var now = Date.now();
              
-               localStorage.setItem("yt-player-quality", JSON.stringify({
+               window.localStorage.setItem("yt-player-quality", JSON.stringify({
                 data: playbackQuality,
                 creation: now,
                 expiration: now + 2419200000

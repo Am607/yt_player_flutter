@@ -215,6 +215,15 @@ class YtController extends ValueNotifier<YtPlayerValue> {
     log('changeVideoQuality("$quality")');
   }
 
+  // toogle the play/pause state
+  void togglePlayPause() {
+    if (value.isPlaying) {
+      _nativeCall('pause()');
+    } else {
+      _nativeCall('play()');
+    }
+  }
+
  
 
   Future<double> get currentTime async {
