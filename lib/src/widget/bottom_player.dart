@@ -36,7 +36,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
   WebStorageManager webStorageManager = WebStorageManager.instance();
   CookieManager cookieManager = CookieManager.instance();
   // set the expiration date for the cookie in milliseconds
-  final expiresDate = DateTime.now().add(Duration(days: 3)).millisecondsSinceEpoch;
+  final expiresDate =  DateTime.now().add(Duration(days: 3)).millisecondsSinceEpoch;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +48,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
       child: InAppWebView(
         initialOptions: InAppWebViewGroupOptions(
           crossPlatform: InAppWebViewOptions(
+            cacheEnabled: true,
             supportZoom: false,
             javaScriptEnabled: true,
             mediaPlaybackRequiresUserGesture: false,
@@ -59,7 +60,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
           ),
           android: AndroidInAppWebViewOptions(
             useWideViewPort: false,
-
+          
             // allowContentAccess: true,
             domStorageEnabled: true,
             useHybridComposition: true,
@@ -293,6 +294,11 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
                 }, 100);
             }
 
+            function setPlaybackRate(rate) {
+                player.setPlaybackRate(rate);
+                return '';
+            } 
+
            function loadById(loadSettings) {
                 player.loadVideoById(loadSettings);
                 return '';
@@ -307,6 +313,8 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
               window.flutter_inappwebview.callHandler('addCurrentTime', time);
               return '';
             }
+
+           
 
             function pause() {
                 player.pauseVideo();
@@ -359,7 +367,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
             player.loadVideoById(player.getVideoData().video_id, currentTime);
               }
             }
-
+   
           
 
     function hideVideoTitle() {
