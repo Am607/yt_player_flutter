@@ -28,8 +28,10 @@ class _BottomControlsState extends State<BottomControls> {
   List playBackSpeed = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5];
   int currentSoundindex = 2;
 
-  List qualityies = ["hd1080","hd720","large","medium","small","tiny","auto"];
-  List qualityNames = ["1080p","720p","480p","360p","240p","144p","Auto"];
+  List qualityies = ["hd1080","tiny","auto"];
+  // List qualityies = ["hd1080","hd720","large","medium","small","tiny","auto"];
+  List qualityNames = ["1080p","144p","Auto"];
+  // List qualityNames = ["1080p","720p","480p","360p","240p","144p","Auto"];
   int currentQulityindex = 0;
   @override
   Widget build(BuildContext context) {

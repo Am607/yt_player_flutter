@@ -36,7 +36,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
   WebStorageManager webStorageManager = WebStorageManager.instance();
   CookieManager cookieManager = CookieManager.instance();
   // set the expiration date for the cookie in milliseconds
-  final expiresDate =  DateTime.now().add(Duration(days: 3)).millisecondsSinceEpoch;
+  final expiresDate = DateTime.now().add(Duration(days: 3)).millisecondsSinceEpoch;
 
   @override
   Widget build(BuildContext context) {
@@ -44,164 +44,179 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
 
     controller = YtController.of(context);
     final size = MediaQuery.of(context).size;
-    return IgnorePointer(
-      child: InAppWebView(
-        initialOptions: InAppWebViewGroupOptions(
-          crossPlatform: InAppWebViewOptions(
-            cacheEnabled: true,
-            supportZoom: false,
-            javaScriptEnabled: true,
-            mediaPlaybackRequiresUserGesture: false,
-            transparentBackground: true,
-            disableContextMenu: true,
-            disableHorizontalScroll: true,
-            disableVerticalScroll: true,
-            useShouldOverrideUrlLoading: true,
-          ),
-          android: AndroidInAppWebViewOptions(
-            useWideViewPort: false,
-          
-            // allowContentAccess: true,
-            domStorageEnabled: true,
-            useHybridComposition: true,
-          ),
-          ios: IOSInAppWebViewOptions(
-            sharedCookiesEnabled: true,
-            allowsInlineMediaPlayback: true,
-            allowsAirPlayForMediaPlayback: true,
-            allowsPictureInPictureMediaPlayback: true,
-          ),
+    //TODO: add ignore pointer
+    return InAppWebView(
+      initialOptions: InAppWebViewGroupOptions(
+        crossPlatform: InAppWebViewOptions(
+          cacheEnabled: true,
+          supportZoom: false,
+          javaScriptEnabled: true,
+          mediaPlaybackRequiresUserGesture: false,
+          transparentBackground: true,
+          disableContextMenu: true,
+          disableHorizontalScroll: true,
+          disableVerticalScroll: true,
+          useShouldOverrideUrlLoading: true,
         ),
-        initialData: InAppWebViewInitialData(
-          data: player,
-          encoding: 'utf-8',
-          mimeType: 'text/html',
-          baseUrl: Uri.parse('https://www.youtube.com/'),
+        android: AndroidInAppWebViewOptions(
+          useWideViewPort: false,
+        
+          // allowContentAccess: true,
+          domStorageEnabled: true,
+          useHybridComposition: true,
         ),
-        onWebViewCreated: (webController) {
-          controller!.upDateValue(controller!.value.copyWith(
-            webViewController: webController,
-          ));
+        ios: IOSInAppWebViewOptions(
+          // sharedCookiesEnabled: true,
+          // dataDetectorTypes: [IOSWKDataDetectorTypes.ALL],
+          allowsInlineMediaPlayback: true,
+          allowsAirPlayForMediaPlayback: true,
+          allowsPictureInPictureMediaPlayback: true,
 
-          webController
-            ..addJavaScriptHandler(
-                handlerName: 'ready',
-                callback: (_) {
-                  // log('ready_detected');
-                  controller!.upDateValue(controller!.value.copyWith(
-                    isReady: true,
-                  ));
-                  controller!.play();
-                  //  controller!.setSize(Size(size.width, 300));
-                })
-            ..addJavaScriptHandler(
-              handlerName: 'PlaybackQualityChange',
-              callback: (args) {
-                // controller!.updateValue(
-                //   controller!.value
-                //       .copyWith(playbackQuality: args.first as String),
-                // );
-              },
-            )
-            ..addJavaScriptHandler(
-              handlerName: 'stateChange',
-              callback: (args) {
-                switch (args.first as int) {
-                  case -1:
-                    controller!.upDateValue(controller!.value.copyWith(
-                      playerState: PlayerState.unstarted,
-                    ));
-                    break;
-
-                  case 0:
-                    controller!.upDateValue(
-                      controller!.value.copyWith(
-                        playerState: PlayerState.ended,
-                      ),
-                    );
-                    break;
-                  case 1:
-                    controller!.upDateValue(
-                      controller!.value.copyWith(
-                        playerState: PlayerState.playing,
-                        isPlaying: true,
-                        hasPlayed: true,
-                        errorCode: 0,
-                      ),
-                    );
-                    break;
-                  case 2:
-                    controller!.upDateValue(
-                      controller!.value.copyWith(
-                        playerState: PlayerState.paused,
-                        isPlaying: false,
-                      ),
-                    );
-                    break;
-                  case 3:
-                    controller!.upDateValue(
-                      controller!.value.copyWith(
-                        playerState: PlayerState.buffering,
-                      ),
-                    );
-                    break;
-                  case 5:
-                    controller!.upDateValue(
-                      controller!.value.copyWith(
-                        playerState: PlayerState.videoCued,
-                      ),
-                    );
-                    break;
-                  default:
-                    throw Exception("Invalid player state obtained.");
-                }
-              },
-            )
-            ..addJavaScriptHandler(
-              handlerName: 'addMetaData',
-              callback: (args) {
-                controller!.upDateValue(
-                  controller!.value
-                      .copyWith(youtubeMetaData: YoutubeMetaData.fromRawData(args.first)),
-                );
-              },
-            )
-            ..addJavaScriptHandler(
-              handlerName: 'VideoTime',
-              callback: (args) {
-                final position = args.first * 1000;
-                final num buffered = args.last;
-                controller!.upDateValue(
-                  controller!.value.copyWith(
-                      position: Duration(milliseconds: position.floor()),
-                      bufferdPosition: Duration(milliseconds: buffered.floor())),
-                );
-              },
-            )
-            ..addJavaScriptHandler(
-              handlerName: 'addMute',
-              callback: (args) {
-                controller!.upDateValue(controller!.value.copyWith(muted: true));
-              },
-            )
-            ..addJavaScriptHandler(
-              handlerName: 'addUnMute',
-              callback: (args) {
-                controller!.upDateValue(controller!.value.copyWith(
-                  muted: false,
-                ));
-              },
-            )
-            ..addJavaScriptHandler(
-              handlerName: 'addCurrentTime',
-              callback: (args) {
-                controller!.upDateValue(controller!.value.copyWith(
-                  currentPosition: args.first as double,
-                ));
-              },
-            );
-        },
+        ),
       ),
+      initialData: InAppWebViewInitialData(
+        data: player,
+        encoding: 'utf-8',
+        mimeType: 'text/html',
+        baseUrl: Uri.parse('https://www.youtube.com/'),
+
+
+      ),
+      onLoadStop: (controller, url) async {
+        //  await controller.evaluateJavascript(
+        //      source: "localStorage.setItem('key', 'JSON.stringify({data: 'tiny', creation: '2416200000', expiration: '2419200000'})')");
+            controller.evaluateJavascript(source: 'setPlaybackQuality("tiny")'); 
+   
+      },
+      onWebViewCreated: (webController) {
+        controller!.upDateValue(controller!.value.copyWith(
+          webViewController: webController,
+        ));
+
+        webController
+          ..addJavaScriptHandler(
+              handlerName: 'ready',
+              callback: (_) {
+                // log('ready_detected');
+                controller!.upDateValue(controller!.value.copyWith(
+                  isReady: true,
+                ));
+                controller!.play();
+              webController.evaluateJavascript(source: 'setPlaybackQuality("tiny")'); 
+                //  controller!.setSize(Size(size.width, 300));
+              })
+          ..addJavaScriptHandler(
+            handlerName: 'PlaybackQualityChange',
+            callback: (args) {
+              // controller!.updateValue(
+              //   controller!.value
+              //       .copyWith(playbackQuality: args.first as String),
+              // );
+            },
+          )
+          ..addJavaScriptHandler(
+            handlerName: 'stateChange',
+            callback: (args) {
+              switch (args.first as int) {
+                case -1:
+                  controller!.upDateValue(controller!.value.copyWith(
+                    playerState: PlayerState.unstarted,
+                  ));
+                  break;
+
+                case 0:
+                  controller!.upDateValue(
+                    controller!.value.copyWith(
+                      playerState: PlayerState.ended,
+                    ),
+                  );
+                  break;
+                case 1:
+                  controller!.upDateValue(
+                    controller!.value.copyWith(
+                      playerState: PlayerState.playing,
+                      isPlaying: true,
+                      hasPlayed: true,
+                      errorCode: 0,
+                    ),
+                  );
+                  break;
+                case 2:
+                  controller!.upDateValue(
+                    controller!.value.copyWith(
+                      playerState: PlayerState.paused,
+                      isPlaying: false,
+                    ),
+                  );
+                  break;
+                case 3:
+                  controller!.upDateValue(
+                    controller!.value.copyWith(
+                      playerState: PlayerState.buffering,
+                    ),
+                  );
+                  break;
+                case 5:
+                  controller!.upDateValue(
+                    controller!.value.copyWith(
+                      playerState: PlayerState.videoCued,
+                    ),
+                  );
+                  break;
+                default:
+                  throw Exception("Invalid player state obtained.");
+              }
+            },
+          )
+          ..addJavaScriptHandler(
+            handlerName: 'addMetaData',
+            callback: (args) {
+              controller!.upDateValue(
+                controller!.value
+                    .copyWith(youtubeMetaData: YoutubeMetaData.fromRawData(args.first)),
+              );
+            },
+          )
+          ..addJavaScriptHandler(
+            handlerName: 'VideoTime',
+            callback: (args) {
+              final position = args.first * 1000;
+              final num buffered = args.last;
+              controller!.upDateValue(
+                controller!.value.copyWith(
+                    position: Duration(milliseconds: position.floor()),
+                    bufferdPosition: Duration(milliseconds: buffered.floor())),
+              );
+            },
+          )
+          ..addJavaScriptHandler(
+            handlerName: 'addMute',
+            callback: (args) async {
+              controller!.upDateValue(controller!.value.copyWith(muted: true));
+              // webStorageManager.ios.fetchDataRecords(dataTypes: )
+              final List<IOSWKWebsiteDataRecord> a = await webStorageManager.ios
+                  .fetchDataRecords(dataTypes: IOSWKWebsiteDataType.ALL);
+              log("a ${a[0].dataTypes.toString()}");
+              // add to lo
+            },
+          )
+          ..addJavaScriptHandler(
+            handlerName: 'addUnMute',
+            callback: (args) {
+              controller!.upDateValue(controller!.value.copyWith(
+                muted: false,
+              ));
+            },
+          )
+          ..addJavaScriptHandler(
+            handlerName: 'addCurrentTime',
+            callback: (args) {
+              controller!.upDateValue(controller!.value.copyWith(
+                currentPosition: args.first as double,
+              ));
+            },
+          );
+      },
     );
   }
 
@@ -224,7 +239,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
                 position: fixed;
                 height: 100%;
                 width: 100%;
-                pointer-events: none;
+                // pointer-events: none;
               
         }
         </style>
@@ -252,7 +267,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
             videoId: '${controller?.videoId}', // youtube video id
             playerVars: {
                 'playsinline': 1,
-                'controls': 0,
+                'controls': 1,
                 'enablejsapi': 1,
                 'fs': 0,
                 'rel': 0,
@@ -348,20 +363,24 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
                 return '';
             }
             function setPlaybackQuality(playbackQuality) {
+              // alert(playbackQuality)
              if (playbackQuality == "auto") {
              //this will make quality auto
              window.localStorage.removeItem("yt-player-quality");
                 } else  {
                 var now = Date.now();
-             
+            //  alert('added')
                window.localStorage.setItem("yt-player-quality", JSON.stringify({
                 data: playbackQuality,
                 creation: now,
                 expiration: now + 2419200000
               })
               );
-           }
-          
+            
+     
+             }
+            alert(window.localStorage.getItem('yt-player-quality'))
+            // alert()
             if (player) {
             var currentTime = player.getCurrentTime();
             player.loadVideoById(player.getVideoData().video_id, currentTime);

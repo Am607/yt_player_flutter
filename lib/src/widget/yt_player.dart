@@ -118,19 +118,20 @@ class _YtPlayerBaseState extends State<YtPlayerBase> {
               // fit: StackFit.expand,
               // clipBehavior: Clip.none,
               children: [
-                GestureDetector(
-                  onTapUp: (TapUpDetails details) {
-                    log('tap up');
-                  },
-                  onPanUpdate: (details) {
-                    log('pan update');
-                    log(details.localPosition.toString());
-                  },
-                  onDoubleTap: (() {
-                    log('double tap');
-                    controller.togglePlayPause();
-                  }),
-                  child: SizedBox(
+                // GestureDetector(
+                //   onTapUp: (TapUpDetails details) {
+                //     log('tap up');
+                //   },
+                //   onPanUpdate: (details) {
+                //     log('pan update');
+                //     log(details.localPosition.toString());
+                //   },
+                //   onDoubleTap: (() {
+                //     log('double tap');
+                //     controller.togglePlayPause();
+                //   }),
+                //   child: 
+                  SizedBox(
                     child: AspectRatio(
                       aspectRatio: 16 / 9,
                       child: SizedBox(
@@ -144,33 +145,33 @@ class _YtPlayerBaseState extends State<YtPlayerBase> {
                       ),
                     ),
                   ),
-                ),
-                const Align(
-                  alignment: Alignment.center,
-                  child: PlayPauseButton(),
-                ),
-                Positioned(
-                  bottom: 34,
-                  right: 0,
-                  child: IconButton(
-                    onPressed: () {
-                      controller.toggleFullScreenMode(context);
-                    },
-                    icon: Icon(
-                      controller.value.isFullScreen
-                          ? Icons.fullscreen_exit
-                          : Icons.fullscreen,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                const Positioned(
-                  bottom: 32,
-                  left: 0,
-                  right: 0,
-                  child: ProgressBarWidget(),
-                ),
-                const Positioned(bottom: 3, left: 0, child: BottomControls()),
+                // ),
+                // const Align(
+                //   alignment: Alignment.center,
+                //   child: PlayPauseButton(),
+                // ),
+                // Positioned(
+                //   bottom: 34,
+                //   right: 0,
+                //   child: IconButton(
+                //     onPressed: () {
+                //       controller.toggleFullScreenMode(context);
+                //     },
+                //     icon: Icon(
+                //       controller.value.isFullScreen
+                //           ? Icons.fullscreen_exit
+                //           : Icons.fullscreen,
+                //       color: Colors.white,
+                //     ),
+                //   ),
+                // ),
+                // const Positioned(
+                //   bottom: 32,
+                //   left: 0,
+                //   right: 0,
+                //   child: ProgressBarWidget(),
+                // ),
+                // const Positioned(bottom: 3, left: 0, child: BottomControls()),
               ],
             ),
           ),
