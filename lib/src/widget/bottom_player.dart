@@ -73,7 +73,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
           ),
         ),
         initialData: InAppWebViewInitialData(
-          data: player,
+          data:  player,
           encoding: 'utf-8',
           mimeType: 'text/html',
           baseUrl: Uri.parse('https://www.youtube.com/'),

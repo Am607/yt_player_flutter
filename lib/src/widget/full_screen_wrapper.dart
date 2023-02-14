@@ -12,7 +12,7 @@ class YoutubePlayerBuilder extends StatefulWidget {
   final YtPlayerBase player;
 
   /// Builds the widget below this [builder].
-  final Widget Function(BuildContext, Widget) builder;
+  final Widget Function(BuildContext, Widget ) builder;
 
   /// Callback to notify that the player has entered fullscreen.
   final VoidCallback? onEnterFullScreen;
@@ -74,6 +74,7 @@ class _YoutubePlayerBuilderState extends State<YoutubePlayerBuilder>
   @override
   Widget build(BuildContext context) {
     final _player = Container(
+      
       color: Colors.black,
       key: playerKey,
       child: WillPopScope(
@@ -88,7 +89,7 @@ class _YoutubePlayerBuilderState extends State<YoutubePlayerBuilder>
         child: Center(child: widget.player),
       ),
     );
-    final child = widget.builder(context, _player);
+    final child = widget.builder(context, _player );
     return OrientationBuilder(
       builder: (context, orientation) =>
           orientation == Orientation.portrait ?child : _player,

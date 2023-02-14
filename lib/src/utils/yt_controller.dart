@@ -224,8 +224,6 @@ class YtController extends ValueNotifier<YtPlayerValue> {
     }
   }
 
- 
-
   Future<double> get currentTime async {
     await _nativeCall('getCurrentTime');
 
@@ -258,8 +256,7 @@ class YtController extends ValueNotifier<YtPlayerValue> {
       ]);
       // Navigator.of(context).push(_createRoute());
     } else {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-          overlays: SystemUiOverlay.values);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
       // Navigator.of(context).pop();
       // Navigator.of(context).didUpdateWidget(Navigator.of(context).widget);
@@ -321,6 +318,5 @@ class InheritedYtPlayer extends InheritedWidget {
   final YtController controller;
 
   @override
-  bool updateShouldNotify(InheritedYtPlayer oldWidget) =>
-      oldWidget.controller.hashCode != controller.hashCode;
+  bool updateShouldNotify(InheritedYtPlayer oldWidget) => oldWidget.controller.hashCode != controller.hashCode;
 }
