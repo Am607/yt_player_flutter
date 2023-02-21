@@ -101,30 +101,31 @@ class _BottomControlsState extends State<BottomControls> {
                       InkWell(
                         onTap: () {
                           // ! quality pop up
-                          // Todo bug fixes
+
                           final d = _controller.value.availableQualities;
-                          log('availableQualities $d');
+                          final d2 = getNewList(d ?? []);
+                          final d3 = getQualityList(d ?? []);
+                          print('availableQualities $d');
                           showBottomSheet(
                             context: context,
                             builder: ((context) {
                               return Wrap(
                                 children: List.generate(
-                                  d?.length ?? 0,
+                                  d3.length,
                                   (index) => InkWell(
                                     onTap: () {
                                       setState(() {
                                         currentQulityindex = index;
-                                        _controller.changeVideoQuality(
-                                            d?[currentQulityindex] ?? 'Auto');
+                                        _controller
+                                            .changeVideoQuality(d3[index] ?? 'Auto');
                                       });
                                       Navigator.pop(context);
                                     },
                                     child: ListTile(
-                                      leading: currentQulityindex == index
-                                          ? const Icon(Icons.check)
-                                          : null,
-                                      title: Text('${d?[index]}'),
-                                    ),
+                                        leading: currentQulityindex == index
+                                            ? const Icon(Icons.check)
+                                            : null,
+                                        title: Text('${d2[index]}')),
                                   ),
                                 ),
                               );
@@ -158,24 +159,73 @@ class _BottomControlsState extends State<BottomControls> {
             ),
           ),
         ),
-        InkWell(
-          onTap: () {},
-          child: Padding(
-            padding: const EdgeInsets.only(left: 15, bottom: 3),
-            child: Text(
-              '${qualityNames[currentQulityindex]}',
-              style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-
-            //  Icon(
-            //   Icons.settings,
-            //   color: Colors.white,
-            //   size: 20,
-            // ),
-          ),
-        ),
+//         InkWell(
+//           onTap: () {},
+//           child: Padding(
+//             padding: const EdgeInsets.only(left: 15, bottom: 3),
+//             child: Text(
+//               '${qualityNames[currentQulityindex]}',
+//               style: const TextStyle(
+//                   color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+//             ),
+//
+//             //  Icon(
+//             //   Icons.settings,
+//             //   color: Colors.white,
+//             //   size: 20,
+//             // ),
+//           ),
+//         ),
       ],
     );
+  }
+
+  // List qualityies = ["hd1080", "hd720", "large", "medium", "small", "tiny", "auto"];
+  // List qualityNames = ["1080p", "720p", "480p", "360p", "240p", "144p", "Auto"];
+
+  String getName(String name) {
+    if (name == 'hd1080') {
+      return '1080p';
+    } else if (name == 'hd720') {
+      return '720p';
+    } else if (name == 'large') {
+      return '480p';
+    } else if (name == 'medium') {
+      return '360p';
+    } else if (name == 'small') {
+      return '240p';
+    } else if (name == 'tiny') {
+      return '144p';
+    } else {
+      return 'Auto';
+    }
+  }
+
+  List getNewList(List<String> list) {
+    List newList = [];
+    for (int i = 0; i < list.length; i++) {
+      if (i == 0) {
+        // log(getName(list[i]));
+        newList.add(getName(list[i]));
+      } else {
+        // log(list[i].substring(1, list[i].length) + i.toString());
+        newList.add(getName(list[i].substring(1, list[i].length)));
+      }
+    }
+    return newList;
+  }
+
+  List getQualityList(List<String> list) {
+    List newList = [];
+    for (int i = 0; i < list.length; i++) {
+      if (i == 0) {
+        // log(getName(list[i]));
+        newList.add(list[i]);
+      } else {
+        // log(list[i].substring(1, list[i].length) + i.toString());
+        newList.add(list[i].substring(1, list[i].length));
+      }
+    }
+    return newList;
   }
 }
