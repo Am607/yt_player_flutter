@@ -13,6 +13,7 @@ import 'package:yt_player/src/widget/yt_player.dart';
 /// the player is not stabel and will have more issue in production
 class YtPlayerValue {
   YtPlayerValue({
+    this.test,
     this.isReady = false,
     this.webViewController,
     this.bufferdPosition = Duration.zero,
@@ -27,6 +28,7 @@ class YtPlayerValue {
     this.volume = 100,
     this.quality,
     this.isFullScreen = false,
+    this.availableQualities,
     this.muted = false,
     this.youtubeMetaData = const YoutubeMetaData(),
   });
@@ -36,6 +38,12 @@ class YtPlayerValue {
 
   /// Return true if the player is ready
   final bool isReady;
+
+
+  /// list of available qualities
+  final List<String>? availableQualities;
+
+  final String? test;
 
   /// whter controller visible or not
   final bool isControllerVisible;
@@ -95,9 +103,13 @@ class YtPlayerValue {
       String? quality,
       int? errorCode,
       double? currentPosition,
+      List<String>? availableQualities,
       bool? muted,
       bool? isFullScreen,
+      String ? test,
       YoutubeMetaData? youtubeMetaData}) {
+        // log('copyWith called');
+        // log(availableQualities.toString());
     return YtPlayerValue(
       isReady: isReady ?? this.isReady,
       webViewController: webViewController ?? this.webViewController,
@@ -110,9 +122,11 @@ class YtPlayerValue {
       isPaused: isPaused ?? this.isPaused,
       volume: volume ?? this.volume,
       muted: muted ?? this.muted,
+      test: test ?? this.test,
       quality: quality ?? this.quality,
       isFullScreen: isFullScreen ?? this.isFullScreen,
       currentPosition: currentPosition ?? this.currentPosition,
+      availableQualities: availableQualities ?? this.availableQualities,
       errorCode: errorCode ?? this.errorCode,
       youtubeMetaData: youtubeMetaData ?? this.youtubeMetaData,
     );
@@ -135,6 +149,7 @@ class YtPlayerValue {
         'errorCode: $errorCode, '
         'hasPlayed: $hasPlayed, '
         'muted: $muted, '
+        'availableQualities: $availableQualities, '
         'quality: $quality, ';
   }
 }
@@ -171,6 +186,7 @@ class YtController extends ValueNotifier<YtPlayerValue> {
   }
 
   void upDateValue(YtPlayerValue newValue) {
+    // log(newValue.toString());
     value = newValue;
   }
 
@@ -194,6 +210,12 @@ class YtController extends ValueNotifier<YtPlayerValue> {
 
   /// unmute the video
   void unMute() => _nativeCall('unMute()');
+
+  /// get all available qualities
+  Future<List?> getQuality() async {
+  final r =  await _nativeCall('getQuality()');
+  return r;
+  }
 
   /// set width
   void setSize(Size size) {
@@ -226,7 +248,6 @@ class YtController extends ValueNotifier<YtPlayerValue> {
 
   Future<double> get currentTime async {
     await _nativeCall('getCurrentTime');
-
     return value.currentPosition ?? 0;
   }
 
@@ -256,7 +277,8 @@ class YtController extends ValueNotifier<YtPlayerValue> {
       ]);
       // Navigator.of(context).push(_createRoute());
     } else {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+          overlays: SystemUiOverlay.values);
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
       // Navigator.of(context).pop();
       // Navigator.of(context).didUpdateWidget(Navigator.of(context).widget);
@@ -318,5 +340,6 @@ class InheritedYtPlayer extends InheritedWidget {
   final YtController controller;
 
   @override
-  bool updateShouldNotify(InheritedYtPlayer oldWidget) => oldWidget.controller.hashCode != controller.hashCode;
+  bool updateShouldNotify(InheritedYtPlayer oldWidget) =>
+      oldWidget.controller.hashCode != controller.hashCode;
 }

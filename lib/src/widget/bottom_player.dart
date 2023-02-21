@@ -36,7 +36,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
   WebStorageManager webStorageManager = WebStorageManager.instance();
   CookieManager cookieManager = CookieManager.instance();
   // set the expiration date for the cookie in milliseconds
-  final expiresDate =  DateTime.now().add(Duration(days: 3)).millisecondsSinceEpoch;
+  final expiresDate = DateTime.now().add(const Duration(days: 3)).millisecondsSinceEpoch;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +60,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
           ),
           android: AndroidInAppWebViewOptions(
             useWideViewPort: false,
-          
+
             // allowContentAccess: true,
             domStorageEnabled: true,
             useHybridComposition: true,
@@ -73,7 +73,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
           ),
         ),
         initialData: InAppWebViewInitialData(
-          data:  player,
+          data: player,
           encoding: 'utf-8',
           mimeType: 'text/html',
           baseUrl: Uri.parse('https://www.youtube.com/'),
@@ -92,6 +92,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
                     isReady: true,
                   ));
                   controller!.play();
+                   controller!.getQuality();
                   //  controller!.setSize(Size(size.width, 300));
                 })
             ..addJavaScriptHandler(
@@ -102,6 +103,16 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
                 //       .copyWith(playbackQuality: args.first as String),
                 // );
               },
+            )
+            ..addJavaScriptHandler(
+              handlerName: 'addQuality',
+              callback: (args) {
+                final qualities = args[0].toString();
+                log(qualities.split(',').toString());
+                controller!.upDateValue(controller!.value.copyWith(
+                    availableQualities:
+                        qualities.substring(1, qualities.length - 1).split(',')));
+               },
             )
             ..addJavaScriptHandler(
               handlerName: 'stateChange',
@@ -266,7 +277,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
                 onStateChange: function(event) { sendPlayerStateChange(event.data); },
             
                }
-          });
+           });
 
        }
             function sendPlayerStateChange(playerState) {
@@ -332,6 +343,14 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
                  window.flutter_inappwebview.callHandler('addUnMute' , false);
                 return '';
             }
+
+            function getQuality() {
+            let quality =  player.getAvailableQualityLevels();
+            //  alert(quality);
+             window.flutter_inappwebview.callHandler('addQuality', quality);
+              return '';
+            }
+
             function setVolume(volume) {
                 player.setVolume(volume);
                 return '';
