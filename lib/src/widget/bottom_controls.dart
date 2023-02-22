@@ -68,29 +68,30 @@ class _BottomControlsState extends State<BottomControls> {
                         onTap: () {
                           //! play back spped pop up
                           showBottomSheet(
-                              context: context,
-                              builder: ((context) {
-                                return Wrap(
-                                  children: List.generate(
-                                      playBackSpeed.length,
-                                      (index) => InkWell(
-                                            onTap: () {
-                                              setState(() {
-                                                currentSoundindex = index;
-                                                _controller.setPlayBackRate(
-                                                    playBackSpeed[currentSoundindex]);
-                                              });
-                                              Navigator.pop(context);
-                                            },
-                                            child: ListTile(
-                                              leading: currentSoundindex == index
-                                                  ? const Icon(Icons.check)
-                                                  : null,
-                                              title: Text('${playBackSpeed[index]}x'),
-                                            ),
-                                          )),
-                                );
-                              }));
+                            context: context,
+                            builder: ((context) {
+                              return Wrap(
+                                children: List.generate(
+                                    playBackSpeed.length,
+                                    (index) => InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              currentSoundindex = index;
+                                              _controller.setPlayBackRate(
+                                                  playBackSpeed[currentSoundindex]);
+                                            });
+                                            Navigator.pop(context);
+                                          },
+                                          child: ListTile(
+                                            leading: currentSoundindex == index
+                                                ? const Icon(Icons.check)
+                                                : null,
+                                            title: Text('${playBackSpeed[index]}x'),
+                                          ),
+                                        )),
+                              );
+                            }),
+                          );
                         },
                         child: ListTile(
                           leading: const Icon(Icons.speed),
