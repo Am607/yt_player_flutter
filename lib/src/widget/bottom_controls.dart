@@ -12,6 +12,7 @@ class BottomControls extends StatefulWidget {
 
 class _BottomControlsState extends State<BottomControls> {
   late YtController _controller;
+
   @override
   void didChangeDependencies() {
     final controller = YtController.of(context);
@@ -34,6 +35,7 @@ class _BottomControlsState extends State<BottomControls> {
   int currentQulityindex = 0;
   @override
   Widget build(BuildContext context) {
+
     return Row(
       children: [
         InkWell(
@@ -106,7 +108,7 @@ class _BottomControlsState extends State<BottomControls> {
                           final d = _controller.value.availableQualities;
                           final d2 = getNewList(d ?? []);
                           final d3 = getQualityList(d ?? []);
-                          print('availableQualities $d');
+                          log('availableQualities $d');
                           showBottomSheet(
                             context: context,
                             builder: ((context) {

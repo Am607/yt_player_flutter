@@ -100,7 +100,10 @@ class _YtPlayerBaseState extends State<YtPlayerBase> {
   Orientation? orientation;
   @override
   Widget build(BuildContext context) {
-    orientation = MediaQuery.of(context).orientation;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      orientation = MediaQuery.of(context).orientation;
+    });
+
     final width = MediaQuery.of(context).size.width;
     return Material(
       elevation: 0,

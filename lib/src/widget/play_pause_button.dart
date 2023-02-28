@@ -27,6 +27,7 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
 
   @override
   Widget build(BuildContext context) {
+
     final width = MediaQuery.of(context).size.width;
     return SizedBox(
       width: width,

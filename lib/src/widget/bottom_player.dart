@@ -42,8 +42,10 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
   Widget build(BuildContext context) {
     // Todo widget look up to the ancestor
 
-    controller = YtController.of(context);
-    final size = MediaQuery.of(context).size;
+      controller = YtController.of(context);
+      final size = MediaQuery.of(context).size;
+    
+
     return IgnorePointer(
       child: InAppWebView(
         initialOptions: InAppWebViewGroupOptions(
@@ -92,7 +94,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
                     isReady: true,
                   ));
                   controller!.play();
-                   controller!.getQuality();
+                  controller!.getQuality();
                   //  controller!.setSize(Size(size.width, 300));
                 })
             ..addJavaScriptHandler(
@@ -112,7 +114,7 @@ class _BottomPlayerState extends State<BottomPlayer> with WidgetsBindingObserver
                 controller!.upDateValue(controller!.value.copyWith(
                     availableQualities:
                         qualities.substring(1, qualities.length - 1).split(',')));
-               },
+              },
             )
             ..addJavaScriptHandler(
               handlerName: 'stateChange',
